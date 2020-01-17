@@ -1,6 +1,9 @@
 """SegmentationNN"""
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import models
+# from torchvision.models.segmentation.fcn import FCNHead
 
 
 class SegmentationNN(nn.Module):
@@ -11,7 +14,13 @@ class SegmentationNN(nn.Module):
         #######################################################################
         #                             YOUR CODE                               #
         #######################################################################
-        
+
+        self.network = models.vgg16(pretrained = True).features[0:22] 
+        self.conv = nn.Sequential (nn.Conv2d(512,256, kernel_size = 1),
+                                    nn.ReLU (inplace = True),
+                                    nn.Conv2d(256,num_classes, kernel_size = 1))
+
+
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
@@ -28,6 +37,10 @@ class SegmentationNN(nn.Module):
         #                             YOUR CODE                               #
         #######################################################################
 
+
+        x = self.network (x)
+        x = self.conv (x)
+        x = F.interpolate (x, size = (240,240), mode = "bilinear", align_corners = True )
         #######################################################################
         #                           END OF YOUR CODE                          #
         #######################################################################
